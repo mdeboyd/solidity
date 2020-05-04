@@ -89,6 +89,8 @@ bool TypeChecker::visit(ContractDefinition const& _contract)
 	for (auto const& n: _contract.subNodes())
 		n->accept(*this);
 
+	m_scope = nullptr;
+
 	return false;
 }
 
@@ -328,7 +330,7 @@ void TypeChecker::endVisit(ModifierDefinition const& _modifier)
 
 bool TypeChecker::visit(FunctionDefinition const& _function)
 {
-	bool isLibraryFunction = _function.inContractKind() == ContractKind::Library;
+	bool isLibraryFunction = !_function.isFree() && _function.inContractKind() == ContractKind::Library;
 
 	if (_function.markedVirtual())
 	{
@@ -417,7 +419,7 @@ bool TypeChecker::visit(FunctionDefinition const& _function)
 		else
 			modifiers.insert(decl);
 	}
-	if (m_scope->isInterface())
+	if (m_scope && m_scope->isInterface())
 	{
 		if (_function.isImplemented())
 			m_errorReporter.typeError(4726_error, _function.location(), "Functions in interfaces cannot have an implementation.");
@@ -428,7 +430,7 @@ bool TypeChecker::visit(FunctionDefinition const& _function)
 		if (_function.isConstructor())
 			m_errorReporter.typeError(6482_error, _function.location(), "Constructor cannot be defined in interfaces.");
 	}
-	else if (m_scope->contractKind() == ContractKind::Library)
+	else if (m_scope && m_scope->contractKind() == ContractKind::Library)
 		if (_function.isConstructor())
 			m_errorReporter.typeError(7634_error, _function.location(), "Constructor cannot be defined in libraries.");
 	if (_function.isImplemented())

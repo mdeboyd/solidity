@@ -106,6 +106,9 @@ ASTPointer<SourceUnit> Parser::parse(shared_ptr<Scanner> const& _scanner)
 			case Token::Enum:
 				nodes.push_back(parseEnumDefinition());
 				break;
+			case Token::Function:
+				nodes.push_back(parseFunctionDefinition());
+				break;
 			default:
 				fatalParserError(7858_error, "Expected pragma, import directive or contract/interface/library/struct/enum definition.");
 			}
