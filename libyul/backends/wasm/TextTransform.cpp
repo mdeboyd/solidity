@@ -19,6 +19,7 @@
  */
 
 #include <libyul/backends/wasm/TextTransform.h>
+#include <libyul/Exceptions.h>
 
 #include <libsolutil/StringUtils.h>
 
@@ -56,7 +57,7 @@ string TextTransform::run(wasm::Module const& _module)
 	ret += "    (export \"main\" (func $main))\n";
 
 	for (auto const& g: _module.globals)
-		ret += "    (global $" + g.variableName + " (mut i64) (i64.const 0))\n";
+		ret += "    (global $" + g.variableName + " (mut " + g.type + ") (" + g.type + ".const 0))\n";
 	ret += "\n";
 	for (auto const& f: _module.functions)
 		ret += transform(f) + "\n";
@@ -65,7 +66,12 @@ string TextTransform::run(wasm::Module const& _module)
 
 string TextTransform::operator()(wasm::Literal const& _literal)
 {
-	return "(i64.const " + to_string(_literal.value) + ")";
+	if (holds_alternative<uint32_t>(_literal.value))
+		return "(i32.const " + to_string(get<uint32_t>(_literal.value)) + ")";
+	else if (holds_alternative<uint64_t>(_literal.value))
+		return "(i64.const " + to_string(get<uint64_t>(_literal.value)) + ")";
+	else
+		yulAssert(false, "Invalid literal type");
 }
 
 string TextTransform::operator()(wasm::StringLiteral const& _literal)
@@ -163,11 +169,11 @@ string TextTransform::transform(wasm::FunctionDefinition const& _function)
 {
 	string ret = "(func $" + _function.name + "\n";
 	for (auto const& param: _function.parameters)
-		ret += "    (param $" + param.name + " i64)\n";
+		ret += "    (param $" + param.name + " " + param.type + ")\n";
 	if (_function.returns)
-		ret += "    (result i64)\n";
+		ret += "    (result " + _function.locals.at(0).type + ")\n";
 	for (auto const& local: _function.locals)
-		ret += "    (local $" + local.variableName + " i64)\n";
+		ret += "    (local $" + local.variableName + " " + local.type + ")\n";
 	ret += indented(joinTransformed(_function.body, '\n'));
 	if (ret.back() != '\n')
 		ret += '\n';
