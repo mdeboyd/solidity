@@ -23,6 +23,9 @@
 
 #include <libsolutil/CommonData.h>
 
+#include <boost/range/irange.hpp>
+#include <boost/range/adaptors.hpp>
+
 #include <array>
 #include <map>
 #include <variant>
@@ -112,7 +115,7 @@ void WordSizeTransform::operator()(Block& _block)
 							yulAssert(varDecl.variables.size() == 1, "");
 							auto newLhs = generateU64IdentifierNames(varDecl.variables[0].name);
 							vector<Statement> ret;
-							for (int i = 0; i < 3; i++)
+							for (size_t i = 0; i < 3; i++)
 								ret.emplace_back(VariableDeclaration{
 									varDecl.location,
 									{TypedName{varDecl.location, newLhs[i], m_targetDialect.defaultType}},
@@ -143,7 +146,7 @@ void WordSizeTransform::operator()(Block& _block)
 					auto newRhs = expandValue(*varDecl.value);
 					auto newLhs = generateU64IdentifierNames(varDecl.variables[0].name);
 					vector<Statement> ret;
-					for (int i = 0; i < 4; i++)
+					for (size_t i = 0; i < 4; i++)
 						ret.emplace_back(VariableDeclaration{
 								varDecl.location,
 								{TypedName{varDecl.location, newLhs[i], m_targetDialect.defaultType}},
@@ -172,7 +175,7 @@ void WordSizeTransform::operator()(Block& _block)
 							yulAssert(assignment.variableNames.size() == 1, "");
 							auto newLhs = generateU64IdentifierNames(assignment.variableNames[0].name);
 							vector<Statement> ret;
-							for (int i = 0; i < 3; i++)
+							for (size_t i = 0; i < 3; i++)
 								ret.emplace_back(Assignment{
 									assignment.location,
 									{Identifier{assignment.location, newLhs[i]}},
@@ -203,7 +206,7 @@ void WordSizeTransform::operator()(Block& _block)
 					auto newRhs = expandValue(*assignment.value);
 					YulString lhsName = assignment.variableNames[0].name;
 					vector<Statement> ret;
-					for (int i = 0; i < 4; i++)
+					for (size_t i = 0; i < 4; i++)
 						ret.emplace_back(Assignment{
 								assignment.location,
 								{Identifier{assignment.location, m_variableMapping.at(lhsName)[i]}},
@@ -382,7 +385,7 @@ std::vector<Statement> WordSizeTransform::handleSwitch(Switch& _switch)
 array<YulString, 4> WordSizeTransform::generateU64IdentifierNames(YulString const& _s)
 {
 	yulAssert(m_variableMapping.find(_s) == m_variableMapping.end(), "");
-	for (int i = 0; i < 4; i++)
+	for (size_t i = 0; i < 4; i++)
 		m_variableMapping[_s][i] = m_nameDispenser.newName(YulString{_s.str() + "_" + to_string(i)});
 	return m_variableMapping[_s];
 }
@@ -392,19 +395,19 @@ array<unique_ptr<Expression>, 4> WordSizeTransform::expandValue(Expression const
 	array<unique_ptr<Expression>, 4> ret;
 	if (holds_alternative<Identifier>(_e))
 	{
-		Identifier const& id = std::get<Identifier>(_e);
-		for (int i = 0; i < 4; i++)
+		auto const& id = std::get<Identifier>(_e);
+		for (size_t i = 0; i < 4; i++)
 			ret[i] = make_unique<Expression>(Identifier{id.location, m_variableMapping.at(id.name)[i]});
 	}
 	else if (holds_alternative<Literal>(_e))
 	{
-		Literal const& lit = std::get<Literal>(_e);
+		auto const& lit = std::get<Literal>(_e);
 		u256 val = valueOfLiteral(lit);
-		for (int i = 3; i >= 0; i--)
+		for (size_t exprIndex: boost::irange(0ul, 4ul) | boost::adaptors::reversed)
 		{
 			u256 currentVal = val & std::numeric_limits<uint64_t>::max();
 			val >>= 64;
-			ret[i] = make_unique<Expression>(
+			ret[exprIndex] = make_unique<Expression>(
 				Literal{
 					lit.location,
 					LiteralKind::Number,
