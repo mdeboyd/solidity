@@ -1276,6 +1276,7 @@ string YulUtilFunctions::mappingIndexAccessFunction(MappingType const& _mappingT
 
 string YulUtilFunctions::readFromStorage(Type const& _type, size_t _offset, bool _splitFunctionTypes)
 {
+	solAssert(_type.isValueType(), "");
 	if (_type.category() == Type::Category::Function)
 		solUnimplementedAssert(!_splitFunctionTypes, "");
 	string functionName =
@@ -1300,6 +1301,7 @@ string YulUtilFunctions::readFromStorage(Type const& _type, size_t _offset, bool
 
 string YulUtilFunctions::readFromStorageDynamic(Type const& _type, bool _splitFunctionTypes)
 {
+	solAssert(_type.isValueType(), "");
 	if (_type.category() == Type::Category::Function)
 		solUnimplementedAssert(!_splitFunctionTypes, "");
 	string functionName =
@@ -1476,7 +1478,11 @@ string YulUtilFunctions::extractFromStorageValue(Type const& _type, size_t _offs
 
 string YulUtilFunctions::cleanupFromStorageFunction(Type const& _type, bool _splitFunctionTypes)
 {
-	solAssert(_type.isValueType(), "");
+	solAssert(
+		_type.isValueType() ||
+		dynamic_cast<ReferenceType const*>(&_type) ||
+		dynamic_cast<MappingType const*>(&_type),
+	"");
 	if (_type.category() == Type::Category::Function)
 		solUnimplementedAssert(!_splitFunctionTypes, "");
 
@@ -1871,10 +1877,18 @@ string YulUtilFunctions::conversionFunction(Type const& _from, Type const& _to)
 					break;
 				case DataLocation::Memory:
 					// Copy the array to a free position in memory, unless it is already in memory.
-					solUnimplementedAssert(from.location() == DataLocation::Memory, "Not implemented yet.");
-					body = "converted := value";
+					if (from.location() == DataLocation::Storage)
+					{
+						solUnimplementedAssert(from.isByteArray() && to.isByteArray(), "");
+
+					}
+					else if (from.location() == DataLocation::Memory)
+						body = "converted := value";
+					else
+						solUnimplemented("");
 					break;
 				case DataLocation::CallData:
+					// TODO this should only be used for trivial conversions
 					solUnimplemented("Conversion of calldata types not yet implemented.");
 					break;
 				}

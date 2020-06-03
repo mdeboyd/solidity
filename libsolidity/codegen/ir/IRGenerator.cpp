@@ -377,6 +377,7 @@ string IRGenerator::generateGetter(VariableDeclaration const& _varDecl)
 					<ret> := <readStorage>(add(slot, <slotOffset>))
 				)")
 				("ret", joinHumanReadable(retVars))
+						// TODO special case for returnTypes[i] is byte array
 				("readStorage", m_utils.readFromStorage(*returnTypes[i], offsets.second, true))
 				("slotOffset", offsets.first.str())
 				.render();
@@ -392,6 +393,7 @@ string IRGenerator::generateGetter(VariableDeclaration const& _varDecl)
 				<ret> := <readStorage>(slot, offset)
 			)")
 			("ret", joinHumanReadable(retVars))
+					// TODO special case for returnTypes[i] is byte array
 			("readStorage", m_utils.readFromStorageDynamic(*returnTypes.front(), true))
 			.render();
 		}
