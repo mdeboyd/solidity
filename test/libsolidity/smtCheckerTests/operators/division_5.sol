@@ -9,3 +9,8 @@ contract C {
 		return c;
 	}
 }
+// ====
+// SMTSolvers: cvc4
+// ----
+// Warning: (169-179): Condition is always true.
+// Warning: (151-156): Overflow (resulting value larger than 2**256 - 1) might happen here.
