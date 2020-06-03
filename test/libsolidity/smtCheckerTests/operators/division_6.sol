@@ -11,3 +11,8 @@ contract C {
 		return c;
 	}
 }
+// ====
+// SMTSolvers: cvc4
+// ----
+// Warning: (282-292): Condition is always true.
+// Warning: (265-270): Overflow (resulting value larger than 2**256 - 1) happens here
