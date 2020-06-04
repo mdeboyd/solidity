@@ -1,5 +1,7 @@
 ### 0.6.10 (unreleased)
 
+Compiler Features:
+ * Optimizer: Add rule to optimize byte-after-shift-left to masking only.
 
 
 ### 0.6.9 (2020-06-04)
