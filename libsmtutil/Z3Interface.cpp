@@ -79,6 +79,8 @@ pair<CheckResult, vector<string>> Z3Interface::check(vector<Expression> const& _
 	vector<string> values;
 	try
 	{
+		cout << "Checking============================\n";
+		cout << m_solver << endl;
 		switch (m_solver.check())
 		{
 		case z3::check_result::sat:
@@ -230,6 +232,8 @@ z3::expr Z3Interface::toZ3Expr(Expression const& _expr)
 	}
 	catch (z3::exception const& _e)
 	{
+		cout << m_solver << endl;
+		cout << _expr.arguments[1].name << endl;
 		smtAssert(false, _e.msg());
 	}
 
@@ -244,6 +248,8 @@ z3::sort Z3Interface::z3Sort(Sort const& _sort)
 		return m_context.bool_sort();
 	case Kind::Int:
 		return m_context.int_sort();
+	case Kind::BitVector:
+		return m_context.bv_sort(dynamic_cast<BitVectorSort const&>(_sort).size);
 	case Kind::Array:
 	{
 		auto const& arraySort = dynamic_cast<ArraySort const&>(_sort);

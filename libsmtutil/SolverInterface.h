@@ -265,23 +265,23 @@ public:
 	}
 	friend Expression operator+(Expression _a, Expression _b)
 	{
-		return Expression("+", std::move(_a), std::move(_b), Kind::Int);
+		return Expression("+", {std::move(_a), std::move(_b)}, _a.sort);
 	}
 	friend Expression operator-(Expression _a, Expression _b)
 	{
-		return Expression("-", std::move(_a), std::move(_b), Kind::Int);
+		return Expression("-", {std::move(_a), std::move(_b)}, _a.sort);
 	}
 	friend Expression operator*(Expression _a, Expression _b)
 	{
-		return Expression("*", std::move(_a), std::move(_b), Kind::Int);
+		return Expression("*", {std::move(_a), std::move(_b)}, _a.sort);
 	}
 	friend Expression operator/(Expression _a, Expression _b)
 	{
-		return Expression("/", std::move(_a), std::move(_b), Kind::Int);
+		return Expression("/", {std::move(_a), std::move(_b)}, _a.sort);
 	}
 	friend Expression operator%(Expression _a, Expression _b)
 	{
-		return Expression("mod", std::move(_a), std::move(_b), Kind::Int);
+		return Expression("mod", {std::move(_a), std::move(_b)}, _a.sort);
 	}
 	friend Expression operator&(Expression _a, Expression _b)
 	{
