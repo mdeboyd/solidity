@@ -1,6 +1,11 @@
 ### 0.6.10 (unreleased)
 
+Language Features:
 
+Compiler Features:
+
+Bugfixes:
+* Type system: Fix internal compiler error on calling externally a function that returns variables with calldata location.
 
 ### 0.6.9 (2020-06-04)
 

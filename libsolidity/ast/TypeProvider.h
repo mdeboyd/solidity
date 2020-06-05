@@ -112,11 +112,20 @@ public:
 	/// @returns a copy of @a _type having the same location as this (and is not a pointer type)
 	///          if _type is a reference type and an unmodified copy of _type otherwise.
 	///          This function is mostly useful to modify inner types appropriately.
-	static Type const* withLocationIfReference(DataLocation _location, Type const* _type)
+	static Type const* withLocationIfReference(DataLocation _location, Type const* _type, bool _isPointer = false)
 	{
 		if (auto refType = dynamic_cast<ReferenceType const*>(_type))
-			return withLocation(refType, _location, false);
+			return withLocation(refType, _location, _isPointer);
 
+		return _type;
+	}
+
+	/// @returns a copy of @a _type having location @a _toLocation if type is reference type and original location is @a _fromLocation
+	///          if @a _type is not reference or doesn't have @a _fromLocation location it is returned unmodified
+	static Type const* withLocationIfReference(DataLocation _fromLocation, DataLocation _toLocation, Type const* _type, bool _isPointer)
+	{
+		if (auto const* refType = dynamic_cast<ReferenceType const*>(_type); refType && refType->location() == _fromLocation)
+			return withLocation(refType, _toLocation, _isPointer);
 		return _type;
 	}
 
