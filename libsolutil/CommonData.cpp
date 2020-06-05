@@ -106,7 +106,7 @@ bytes solidity::util::fromHex(std::string const& _s, WhenError _throw)
 	{
 		int h = fromHex(_s[s++], _throw);
 		if (h != -1)
-			ret.push_back(h);
+			ret.push_back(static_cast<uint8_t>(h));
 		else
 			return bytes();
 	}
@@ -115,7 +115,7 @@ bytes solidity::util::fromHex(std::string const& _s, WhenError _throw)
 		int h = fromHex(_s[i], _throw);
 		int l = fromHex(_s[i + 1], _throw);
 		if (h != -1 && l != -1)
-			ret.push_back((uint8_t)(h * 16 + l));
+			ret.push_back(static_cast<uint8_t>(h * 16 + l));
 		else
 			return bytes();
 	}
@@ -151,11 +151,11 @@ string solidity::util::getChecksummedAddress(string const& _addr)
 	for (size_t i = 0; i < 40; ++i)
 	{
 		char addressCharacter = s[i];
-		unsigned nibble = (unsigned(hash[i / 2]) >> (4 * (1 - (i % 2)))) & 0xf;
+		size_t nibble = static_cast<size_t>(hash[static_cast<unsigned>(i) / 2] >> (4 * (1 - (i % 2)))) & 0xf;
 		if (nibble >= 8)
-			ret += toupper(addressCharacter);
+			ret += static_cast<char>(toupper(addressCharacter));
 		else
-			ret += tolower(addressCharacter);
+			ret += static_cast<char>(tolower(addressCharacter));
 	}
 	return ret;
 }
