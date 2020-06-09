@@ -349,10 +349,10 @@ commandline compiler for linking):
 
 ::
 
-    // This will not compile after 0.6.0
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.5.0 <0.5.99;
-
+    // This will not compile after 0.6.0
+    
     library OldLibrary {
         function someFunction(uint8 a) public returns(bool);
     }
